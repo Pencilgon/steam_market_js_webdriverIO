@@ -1,47 +1,47 @@
-import allure from '@wdio/allure-reporter';
-import Browser from "../../framework/browser/Browser.js";
-import BasePage from "../../framework/page/BasePage.js";
-import { Button } from "../../framework/elements/Button.js";
-import { Input } from "../../framework/elements/Input.js";
-import { Label } from "../../framework/elements/Label.js";
+import Browser from '../../framework/browser/Browser.js';
+import BasePage from '../../framework/page/BasePage.js';
+import { Button } from '../../framework/elements/Button.js';
+import { Input } from '../../framework/elements/Input.js';
+import { Label } from '../../framework/elements/Label.js';
 
 class AdvancedOptionsForm extends BasePage {
-    buttonContainsText = (text) => new Button(`//span[contains(text(),'${text}')]/..`, `${text} Button`);
-    filterField = new Input("//input[contains(@placeholder,'Filter')]", "Filter Field");
-    buttonWithText = (text) => new Button(`//*[text()='${text}']`, `${text} Button`);
-    selectFromOptions = (text) => new Button(`//div[@role='checkbox']/following-sibling::div[text()='${text}']`, `Select ${text} from options`);
+  buttonWithName = (text) => new Button(`//span[contains(text(),'${text}')]/..`, `${text} Button`);
 
-    constructor() {
-        super(
-            new Label("//*[contains(text(),'Search Community Market')]", "Form Header"),
-            "Advanced Search Form"
-        );
-    }
+  filterField = new Input("//input[contains(@placeholder,'Filter')]", 'Filter Field');
 
-    async clickButtonContainsText(text) {
-        allure.startStep(`Click button containing text: ${text}`);
-        await this.buttonContainsText(text).click();
-        allure.endStep();
-    }
+  optionButtonWithText = (text) => new Button(`//span[text()='${text}']`, `${text} Button`);
 
-    async clickButtonWithText(text) {
-        allure.startStep(`Click button with exact text: ${text}`);
-        await this.buttonWithText(text).click();
-        allure.endStep();
-    }
+  selectFromOptions = (text) => new Button(`//div[@role='checkbox']/following-sibling::div[text()='${text}']`, `Select ${text} from options`);
 
-    async typeIntoFilter(text) {
-        allure.startStep(`Type into filter: ${text}`);
-        await this.filterField.typeTextWithClear(text);
-        await Browser.pressKeys('Enter');
-        allure.endStep();
-    }
+  searchButton = new Button("//button[@type='submit']", "Search Button");
 
-    async clickElementFromOptions(text) {
-        allure.startStep(`Select option: ${text}`);
-        await this.selectFromOptions(text).click();
-        allure.endStep();
-    }
+  constructor() {
+    super(
+      new Label("//h1[contains(text(),'Search Community Market')]", 'Form Header'),
+      'Advanced Search Form',
+    );
+  }
+
+  async clickButtonWithName(text) {
+    await this.buttonWithName(text).click();
+  }
+
+  async clickOptionButtonWithText(text) {
+    await this.optionButtonWithText(text).click();
+  }
+
+  async typeIntoFilter(text) {
+    await this.filterField.typeTextWithClear(text);
+    await Browser.pressKeys('Enter');
+  }
+
+  async clickElementFromOptions(text) {
+    await this.selectFromOptions(text).click();
+  }
+
+  async clickSearchButton(){
+    await this.searchButton.click();
+  }
 }
 
 export default new AdvancedOptionsForm();
