@@ -15,12 +15,10 @@ Feature: Steam Community Market search and filtering
     And I select "Hero" as "Phantom Assassin"
     And I select "Rarity" as "Rare"
     And I click "Search" in the advanced options
-
     Then The results table is loaded
     And Correct tags are displayed under "Showing results for"
     
     When I click the 1 item in the list
-
     Then The item page is opened
     And The game name matches the selected filter
     And The item type matches the selected filter
@@ -31,7 +29,6 @@ Feature: Steam Community Market search and filtering
     And I select "Hero" as "Anti-Mage"
     And I select "Rarity" as "Uncommon"
     And I click "Search" in the advanced options
-    
     Then The results table is loaded
     And Correct tags are displayed under "Showing results for"
     

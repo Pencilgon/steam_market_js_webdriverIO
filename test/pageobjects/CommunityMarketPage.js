@@ -8,7 +8,7 @@ class CommunityMarketPage extends BasePage {
 
   resultsTable = new ElementsList(Button, "//a[@class='market_listing_row_link']", 'Results Table');
 
-  listOfTagsOfSearchResults = (text) => new ElementsList(Button, `//*[contains(text(),'${text}')]/following-sibling::div/div`, `${text} Tags`);
+  listOfTagsOfSearchResults = (text) => new ElementsList(Button, `//h2[contains(text(),'${text}')]/following-sibling::div/div`, `${text} Tags`);
 
   buttonWithColumnName = (columnName) => new Button(`//div[@data-sorttype='${columnName}']`, `${columnName} Button`);
 
@@ -37,37 +37,42 @@ class CommunityMarketPage extends BasePage {
   async getPricesOfResults() {
     const priceElements = await this.listOfPrices.getListOfElements();
 
-    const prices = await Promise.all(priceElements.map(async (el) => {
+    return Promise.all(priceElements.map(async (el) => {
       const text = await el.getText();
-      const cleaned = text.replace(/[^0-9.]/g, '');
-      const price = parseFloat(cleaned);
-      return isNaN(price) ? null : price;
+      const cleaned = text.replace(/[^0-9.,]/g, '').replace(',', '');
+      return parseFloat(cleaned);
     }));
-
-    return prices.filter((price) => price !== null);
   }
 
-  async setSortOrderForTheColumn(columnName, order) {
+  async setSortOrderForTheColumn(columnName, desiredOrder) {
     const arrow = this.sortArrow(columnName);
+    const button = this.buttonWithColumnName(columnName);
 
     const getState = async () => {
-      const text = await arrow.getText();
-      if (!text || text.trim() === '') return 'none';
+      const text = (await arrow.getText()).trim();
       return text.includes('▲') ? 'ascending' : 'descending';
     };
 
-    let current = await getState();
+    await browser.waitUntil(async () => {
+      const currentOrder = await getState();
 
-    while (current !== order) {
-      const button = this.buttonWithColumnName(columnName);
+      if (currentOrder === desiredOrder) {
+        return true;
+      }
+
       await button.click();
 
-      await browser.waitUntil(async () => await this.searchResultsTableContainer._get$().isDisplayed(), {
-        timeoutMsg: 'Table container did not reappear (indicating table did not load)',
-      });
+      await browser.waitUntil(
+        async () => await this.searchResultsTableContainer.state().waitForDisplayed(),
+        {
+          timeoutMsg: 'Table container did not reappear after click',
+        }
+      );
 
-      current = await getState();
-    }
+      return (await getState()) === desiredOrder;
+    }, {
+      timeoutMsg: `Failed to set sort order to "${desiredOrder}" for column "${columnName}"`,
+    });
   }
 }
 
