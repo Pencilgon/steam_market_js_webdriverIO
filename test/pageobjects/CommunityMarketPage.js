@@ -56,22 +56,15 @@ class CommunityMarketPage extends BasePage {
     await browser.waitUntil(async () => {
       const currentOrder = await getState();
 
-      if (currentOrder === desiredOrder) {
-        return true;
+      if (currentOrder !== desiredOrder) {
+        await button.click();
+
+        await this.searchResultsTableContainer.state().waitForDisplayed();
+
+        return false;
       }
 
-      await button.click();
-
-      await browser.waitUntil(
-        async () => await this.searchResultsTableContainer.state().waitForDisplayed(),
-        {
-          timeoutMsg: 'Table container did not reappear after click',
-        }
-      );
-
-      return (await getState()) === desiredOrder;
-    }, {
-      timeoutMsg: `Failed to set sort order to "${desiredOrder}" for column "${columnName}"`,
+      return true;
     });
   }
 }
